@@ -1,1 +1,24 @@
-
+[
+  {
+    "id": "1778273054669",
+    "version": "bo",
+    "channel": "stable",
+    "url": "",
+    "notes": "",
+    "size": "",
+    "arch": "arm64 · LTO",
+    "type": "Magisk Module",
+    "date": "2026-05-08T20:44:14.670Z"
+  },
+  {
+    "id": "1778273105891",
+    "version": "V5",
+    "channel": "stable",
+    "url": "https://github.com/mrkk9091/Anioptimizer/releases/tag/Anioptimizer",
+    "notes": "AniOptimizer V5.0 is a root-based Android gaming performance daemon that dynamically optimizes CPU, GPU, memory, and thermals in real time while gaming. It automatically switches between 5 performance states (SAFE to TURBO) based on system load, FPS, and temperature to keep games smooth and stable. It also includes frame pacing control, adaptive learning per game, and safe-mode protection.",
+    "size": "89.67k",
+    "arch": "arm64 · LTO",
+    "type": "Magisk / KernelSU Module",
+    "date": "2026-05-08T20:45:05.892Z"
+  }
+]
