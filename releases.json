@@ -1,13 +1,14 @@
 [
   {
-    "id": "e4590646-d46d-41ed-89d5-e82de4783487",
+    "id": "ed6bcbf2-ff14-4f64-9b73-b1943637bf18",
+    "name": "AniOptimizer",
     "version": "V5",
     "notes": "V5 adds frame pacing, predictive thermals, per-thread uclamp, PSI memory management, and per-game learning—all from a native C daemon.",
     "url": "https://github.com/mrkk9091/Anioptimizer/releases/download/Anioptimizer/AniOptimizer_V5.0.zip",
     "channel": "stable",
-    "size": "89.67K",
+    "size": "81.1KB",
     "arch": "arm64 · LTO",
     "type": "Magisk / KernelSU Module",
-    "date": "2026-05-09T10:54:47.110Z"
+    "date": "2026-05-09T12:47:19.474Z"
   }
 ]
