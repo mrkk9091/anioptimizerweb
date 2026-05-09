@@ -1,24 +1,13 @@
 [
   {
-    "id": "aba1b2c1-ac2c-4f75-a065-b2eedad06cfc",
-    "version": "V6",
-    "notes": "",
-    "url": "",
-    "channel": "stable",
-    "size": "8",
-    "arch": "arm64 · LTO",
-    "type": "Magisk Module",
-    "date": "2026-05-09T03:30:12.474Z"
-  },
-  {
-    "id": "1778273105891",
+    "id": "ae1fc532-d215-436b-b7ac-26ffc4f8851f",
     "version": "V5",
-    "channel": "stable",
+    "notes": "V5 adds frame pacing, predictive thermals, per-thread uclamp, PSI memory management, and per-game learning—all from a native C daemon",
     "url": "https://github.com/mrkk9091/Anioptimizer/releases/tag/Anioptimizer",
-    "notes": "AniOptimizer V5.0 is a root-based Android gaming performance daemon that dynamically optimizes CPU, GPU, memory, and thermals in real time while gaming. It automatically switches between 5 performance states (SAFE to TURBO) based on system load, FPS, and temperature to keep games smooth and stable. It also includes frame pacing control, adaptive learning per game, and safe-mode protection.",
-    "size": "89.67k",
+    "channel": "stable",
+    "size": "89.67K",
     "arch": "arm64 · LTO",
-    "type": "Magisk / KernelSU Module",
-    "date": "2026-05-08T20:45:05.892Z"
+    "type": "Magisk KernelSU Module",
+    "date": "2026-05-09T03:34:58.779Z"
   }
 ]
