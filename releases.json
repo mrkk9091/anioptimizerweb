@@ -1,5 +1,16 @@
 [
   {
+    "id": "aba1b2c1-ac2c-4f75-a065-b2eedad06cfc",
+    "version": "V6",
+    "notes": "",
+    "url": "",
+    "channel": "stable",
+    "size": "8",
+    "arch": "arm64 · LTO",
+    "type": "Magisk Module",
+    "date": "2026-05-09T03:30:12.474Z"
+  },
+  {
     "id": "1778273105891",
     "version": "V5",
     "channel": "stable",
