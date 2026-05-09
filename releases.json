@@ -1,16 +1,5 @@
 [
   {
-    "id": "78f451dd-a83f-46dd-b4e7-8565f6888177",
-    "version": "V1",
-    "notes": "",
-    "url": "",
-    "channel": "stable",
-    "size": "",
-    "arch": "arm64 · LTO",
-    "type": "Magisk Module",
-    "date": "2026-05-09T05:32:54.176Z"
-  },
-  {
     "id": "ae1fc532-d215-436b-b7ac-26ffc4f8851f",
     "version": "V5",
     "notes": "V5 adds frame pacing, predictive thermals, per-thread uclamp, PSI memory management, and per-game learning—all from a native C daemon",
