@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniOptimizer — Native Android Gaming Daemon</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;600;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#090c10; --surface:#0d1117; --surface2:#161b22;
+  --border:#21262d; --accent:#00d4ff; --green:#7ee787;
+  --yellow:#f7c948; --purple:#d2a8ff;
+  --text:#e6edf3; --muted:#8b949e; --danger:#f85149;
+  --nav-h:64px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;overflow-y:scroll;overflow-x:hidden;max-width:100%;}
+body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;}
+section{display:none !important;}
+section.active-section{display:flex !important;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,212,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(0,212,255,.022) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+body::after{content:'';position:fixed;top:0;left:50%;transform:translateX(-50%);width:min(900px,100vw);height:480px;background:radial-gradient(ellipse at top,rgba(0,212,255,.055) 0%,transparent 68%);pointer-events:none;z-index:0;}
+.wrap{max-width:960px;margin:0 auto;padding:0 24px;position:relative;z-index:1;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.anim{animation:fadeUp .55s ease both;}
+.d1{animation-delay:.08s}.d2{animation-delay:.16s}.d3{animation-delay:.24s}.d4{animation-delay:.32s}.d5{animation-delay:.4s}
+
+nav{position:sticky;top:0;z-index:50;height:var(--nav-h);display:flex;align-items:center;border-bottom:1px solid var(--border);background:rgba(9,12,16,.82);backdrop-filter:blur(18px);}
+.nav-inner{width:100%;max-width:960px;margin:0 auto;padding:0 24px;display:flex;align-items:center;justify-content:space-between;}
+.nav-logo{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;color:var(--accent);letter-spacing:.04em;text-decoration:none;}
+.nav-logo span{color:var(--muted);font-weight:400;}
+.nav-links{display:flex;align-items:center;gap:2px;list-style:none;}
+.nav-links a{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;padding:6px 9px;border-radius:8px;transition:color .2s,background .2s;letter-spacing:.03em;white-space:nowrap;}
+.nav-links a:hover{color:var(--text);background:var(--surface2);}
+.nav-links a.active{color:var(--accent);background:rgba(0,212,255,.08);}
+.nav-gh{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;color:var(--muted);text-decoration:none;padding:7px 13px;border-radius:8px;transition:color .2s,background .2s;letter-spacing:.04em;}
+.nav-gh:hover{color:var(--text);background:var(--surface2);}
+.hamburger{display:none;flex-direction:column;gap:5px;background:none;border:none;cursor:pointer;padding:4px;}
+.hamburger span{display:block;width:22px;height:2px;background:var(--muted);border-radius:2px;transition:all .25s;}
+.mobile-menu{display:none;position:fixed;top:var(--nav-h);left:0;right:0;background:var(--surface);border-bottom:1px solid var(--border);z-index:49;padding:16px 24px 20px;animation:slideDown .25s ease;}
+.mobile-menu.open{display:block;}
+.mobile-menu a{display:block;padding:12px 0;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted);text-decoration:none;border-bottom:1px solid var(--border);transition:color .2s;}
+.mobile-menu a:last-child{border-bottom:none;}
+.mobile-menu a:hover{color:var(--accent);}
+
+.badge{display:inline-flex;align-items:center;gap:8px;background:rgba(0,212,255,.07);border:1px solid rgba(0,212,255,.22);border-radius:100px;padding:6px 18px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:28px;}
+.badge .dot{width:6px;height:6px;background:var(--green);border-radius:50%;box-shadow:0 0 8px var(--green);animation:pulse 2s infinite;}
+.hero-title{font-size:clamp(28px,7.5vw,96px);font-weight:800;letter-spacing:-2px;line-height:1.05;white-space:nowrap;}
+.t-white{color:var(--text)}.t-cyan{color:var(--accent);}
+.hero-sub{font-size:16px;color:var(--muted);max-width:540px;margin:22px auto 0;line-height:1.75;font-weight:400;}
+.hero-btns{display:flex;justify-content:center;gap:12px;margin-top:40px;flex-wrap:nowrap;}
+.btn-primary{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#090c10;font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;text-decoration:none;transition:all .2s;border:none;cursor:pointer;white-space:nowrap;}
+.btn-primary:hover{background:#33ddff;transform:translateY(-2px);box-shadow:0 10px 28px rgba(0,212,255,.28);}
+.btn-ghost{display:inline-flex;align-items:center;gap:8px;background:transparent;color:var(--text);font-family:'Syne',sans-serif;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;border:1px solid var(--border);text-decoration:none;transition:all .2s;cursor:pointer;white-space:nowrap;}
+.btn-ghost:hover{border-color:var(--muted);background:var(--surface2);}
+.hero-stats{display:flex;justify-content:center;gap:40px;margin-top:56px;flex-wrap:wrap;}
+.stat{text-align:center;}
+.stat-value{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--text);line-height:1;}
+.stat-value span{color:var(--accent);}
+.stat-label{font-size:12px;color:var(--muted);margin-top:6px;letter-spacing:.05em;}
+
+.section-wrap{padding:80px 0;}
+.section-eye{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:10px;}
+.section-eye::after{content:'';flex:1;height:1px;background:var(--border);}
+.section-title{font-size:clamp(26px,5vw,38px);font-weight:800;letter-spacing:-.5px;margin-bottom:14px;}
+.section-desc{font-size:15px;color:var(--muted);max-width:600px;line-height:1.7;margin-bottom:48px;}
+
+section{min-height:100vh;flex-direction:column;justify-content:center;}
+.section-wrap{padding:80px 0;width:100%;}
+#home{background:var(--bg);padding:96px 0 80px;text-align:center;}
+#features{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+#compat{background:var(--bg);}
+#install{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+#downloads{background:var(--bg);}
+#faq{background:var(--surface);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+#about{background:var(--bg);}
+
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;}
+.feat-card{background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:24px;transition:border-color .2s,transform .2s;}
+.feat-card:hover{border-color:rgba(0,212,255,.3);transform:translateY(-2px);}
+.feat-icon{font-size:26px;margin-bottom:14px;display:block;}
+.feat-title{font-size:15px;font-weight:700;margin-bottom:8px;}
+.feat-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+
+.steps{display:flex;flex-direction:column;gap:0;}
+.step{display:grid;grid-template-columns:48px 1fr;gap:20px;padding-bottom:32px;}
+.step:last-child{padding-bottom:0;}
+.step-line{display:flex;flex-direction:column;align-items:center;}
+.step-num{width:48px;height:48px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;color:var(--accent);position:relative;z-index:1;}
+.step-connector{flex:1;width:1px;background:var(--border);margin-top:8px;}
+.step:last-child .step-connector{display:none;}
+.step-body{padding-top:10px;}
+.step-title{font-size:16px;font-weight:700;margin-bottom:6px;}
+.step-desc{font-size:13px;color:var(--muted);line-height:1.65;}
+.step-code{margin-top:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#c9d1d9;line-height:1.7;overflow-x:auto;}
+.step-code .kw{color:#ff7b72;}.step-code .cm{color:var(--muted);font-style:italic;}
+
+.releases-list{display:flex;flex-direction:column;gap:14px;}
+.release-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:28px 32px;display:grid;grid-template-columns:1fr auto;align-items:center;gap:24px;transition:border-color .2s,box-shadow .2s,transform .2s;}
+.release-card:hover{border-color:rgba(0,212,255,.28);box-shadow:0 8px 32px rgba(0,212,255,.06);transform:translateY(-1px);}
+.release-card.is-latest{border-color:rgba(0,212,255,.3);background:linear-gradient(135deg,rgba(0,212,255,.04),var(--surface));}
+.release-header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px;}
+.release-version{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:700;}
+.rtag{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;padding:3px 10px;border-radius:6px;text-transform:uppercase;letter-spacing:.07em;}
+.rtag-latest{background:rgba(0,212,255,.12);color:var(--accent);border:1px solid rgba(0,212,255,.25);}
+.rtag-stable{background:rgba(126,231,135,.12);color:var(--green);border:1px solid rgba(126,231,135,.25);}
+.rtag-beta{background:rgba(247,201,72,.12);color:var(--yellow);border:1px solid rgba(247,201,72,.25);}
+.rtag-alpha{background:rgba(248,81,73,.12);color:var(--danger);border:1px solid rgba(248,81,73,.25);}
+.release-date{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);}
+.release-notes{font-size:14px;color:var(--muted);line-height:1.65;margin-bottom:14px;}
+.release-chips{display:flex;gap:10px;flex-wrap:wrap;}
+.chip{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:4px 10px;}
+.chip span{color:var(--text);}
+.dl-btn{display:flex;align-items:center;gap:8px;background:var(--accent);color:#090c10;font-family:'Syne',sans-serif;font-size:13px;font-weight:700;padding:12px 22px;border-radius:10px;text-decoration:none;white-space:nowrap;border:none;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.dl-btn:hover{background:#33ddff;transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.3);}
+.dl-btn.no-link{background:var(--surface2);color:var(--muted);border:1px solid var(--border);cursor:not-allowed;box-shadow:none;transform:none;}
+.empty-state{text-align:center;padding:72px 24px;background:var(--surface);border:1px dashed var(--border);border-radius:16px;}
+.empty-icon{font-size:48px;margin-bottom:16px;opacity:.45;}
+.empty-title{font-size:18px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+.empty-sub{font-size:14px;color:var(--muted);opacity:.6;}
+
+.faq-list{display:flex;flex-direction:column;gap:10px;}
+.faq-item{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s;}
+.faq-item:hover{border-color:rgba(0,212,255,.2);}
+.faq-q{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 22px;cursor:pointer;font-size:15px;font-weight:600;user-select:none;}
+.faq-arrow{color:var(--muted);transition:transform .25s;flex-shrink:0;}
+.faq-item.open .faq-arrow{transform:rotate(180deg);}
+.faq-a{display:none;padding:16px 22px 18px;font-size:14px;color:var(--muted);line-height:1.7;border-top:1px solid var(--border);}
+.faq-item.open .faq-a{display:block;}
+
+.compat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-bottom:40px;}
+.compat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:20px 22px;display:flex;align-items:flex-start;gap:14px;transition:border-color .2s,transform .2s;}
+.compat-card:hover{border-color:rgba(0,212,255,.28);transform:translateY(-2px);}
+.compat-icon{width:40px;height:40px;flex-shrink:0;background:var(--surface2);border:1px solid var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;}
+.compat-name{font-size:14px;font-weight:700;margin-bottom:4px;}
+.compat-detail{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted);line-height:1.6;}
+.req-table{width:100%;border-collapse:collapse;}
+.req-table tr{border-bottom:1px solid var(--border);}
+.req-table tr:last-child{border-bottom:none;}
+.req-table td{padding:13px 0;font-size:13px;vertical-align:top;}
+.req-table td:first-child{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;width:160px;padding-top:15px;}
+.req-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:3px 9px;margin:2px 4px 2px 0;color:var(--text);}
+.req-tag.yes{background:rgba(126,231,135,.1);border-color:rgba(126,231,135,.25);color:var(--green);}
+.req-tag.no{background:rgba(248,81,73,.08);border-color:rgba(248,81,73,.2);color:var(--danger);}
+
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:32px;align-items:start;}
+@media(max-width:700px){.about-grid{grid-template-columns:1fr;}}
+.about-card{background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:24px;}
+.about-card-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.14em;text-transform:uppercase;margin-bottom:16px;}
+.changelog-list{display:flex;flex-direction:column;gap:0;}
+.cl-item{display:grid;grid-template-columns:18px 1fr;gap:14px;padding-bottom:18px;}
+.cl-item:last-child{padding-bottom:0;}
+.cl-dot-line{display:flex;flex-direction:column;align-items:center;padding-top:6px;}
+.cl-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);flex-shrink:0;}
+.cl-line{flex:1;width:1px;background:var(--border);margin-top:6px;}
+.cl-item:last-child .cl-line{display:none;}
+.cl-ver{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.cl-notes{font-size:12px;color:var(--muted);line-height:1.65;}
+.about-info-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.about-info-row:last-child{border-bottom:none;}
+.about-info-row span:first-child{color:var(--muted);font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;}
+.about-info-row span:last-child{color:var(--text);font-weight:600;}
+.about-links{display:flex;flex-direction:column;gap:10px;margin-top:16px;}
+.about-link{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--bg);border:1px solid var(--border);border-radius:10px;text-decoration:none;color:var(--text);font-size:13px;font-weight:600;transition:border-color .2s,transform .2s;}
+.about-link:hover{border-color:rgba(0,212,255,.3);transform:translateX(3px);}
+.about-link-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;background:var(--surface2);border:1px solid var(--border);flex-shrink:0;}
+
+footer{border-top:1px solid var(--border);padding:48px 0 32px;}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:40px;margin-bottom:40px;}
+.footer-brand-name{font-size:20px;font-weight:800;margin-bottom:10px;}
+.footer-brand-desc{font-size:13px;color:var(--muted);line-height:1.65;max-width:280px;}
+.footer-col-title{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px;}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:10px;}
+.footer-links a{font-size:13px;color:var(--muted);text-decoration:none;transition:color .2s;}
+.footer-links a:hover{color:var(--text);}
+.footer-bottom{border-top:1px solid var(--border);padding-top:24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.footer-copy{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted);}
+.footer-legal{font-size:12px;color:var(--muted);opacity:.55;max-width:480px;text-align:right;}
+
+@media(max-width:700px){
+  .nav-links{display:none;}.hamburger{display:flex;}
+  .footer-grid{grid-template-columns:1fr;gap:28px;}
+  .footer-legal{text-align:left;}
+  .release-card{grid-template-columns:1fr;}
+  .hero-stats{gap:20px;}
+  .release-chips{display:none;}
+  section.active-section{min-height:100svh;}
+  #home{padding:72px 0 60px;}
+  .hero-sub{font-size:14px;}
+  .stat-value{font-size:22px;}
+  .wrap{padding:0 16px;}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-logo" href="#" onclick="showSection('home');return false;">Ani<span>Optimizer</span></a>
+    <ul class="nav-links">
+      <li><a href="#" onclick="showSection('home',this);return false;">Home</a></li>
+      <li><a href="#" onclick="showSection('features',this);return false;">Features</a></li>
+      <li><a href="#" onclick="showSection('compat',this);return false;">Compat</a></li>
+      <li><a href="#" onclick="showSection('install',this);return false;">Install</a></li>
+      <li><a href="#" onclick="showSection('downloads',this);return false;">Downloads</a></li>
+      <li><a href="#" onclick="showSection('faq',this);return false;">FAQ</a></li>
+      <li><a href="#" onclick="showSection('about',this);return false;">About</a></li>
+      <li><a class="nav-gh" href="https://github.com/mrkk9091" target="_blank" rel="noopener"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>GitHub</a></li>
+    </ul>
+    <button class="hamburger" onclick="toggleMobile()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#" onclick="showSection('home');closeMobile();return false;">Home</a>
+  <a href="#" onclick="showSection('features');closeMobile();return false;">Features</a>
+  <a href="#" onclick="showSection('compat');closeMobile();return false;">Compatibility</a>
+  <a href="#" onclick="showSection('install');closeMobile();return false;">Install</a>
+  <a href="#" onclick="showSection('downloads');closeMobile();return false;">Downloads</a>
+  <a href="#" onclick="showSection('faq');closeMobile();return false;">FAQ</a>
+  <a href="#" onclick="showSection('about');closeMobile();return false;">About</a>
+  <a href="https://github.com/mrkk9091" target="_blank" rel="noopener" onclick="closeMobile()">GitHub ↗</a>
+  <a href="https://t.me/optimizeph" target="_blank" rel="noopener" onclick="closeMobile()">Telegram ↗</a>
+</div>
+
+<section id="home">
+  <div class="wrap">
+    <div class="badge anim">
+      <span class="dot"></span>
+      Latest: <span id="heroBadge">Loading…</span>
+    </div>
+    <h1 class="hero-title anim d1">
+      <span class="t-white">Ani</span><span class="t-cyan">Optimizer</span>
+    </h1>
+    <p class="hero-sub anim d2">A native C gaming daemon for Android. Eliminates stutter, jank, and thermal throttle — in real time, without scripts or overhead.</p>
+    <div class="hero-btns anim d3">
+      <a class="btn-primary" href="#" onclick="showSection('downloads');return false;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Now
+      </a>
+      <a class="btn-ghost" href="#" onclick="showSection('features');return false;">See Features</a>
+    </div>
+    <div class="hero-stats anim d4">
+      <div class="stat"><div class="stat-value" id="heroVersion">—</div><div class="stat-label">Current Version</div></div>
+      <div class="stat"><div class="stat-value"><span>arm64</span></div><div class="stat-label">Architecture</div></div>
+      <div class="stat"><div class="stat-value">5<span>ms</span></div><div class="stat-label">Reaction Time</div></div>
+      <div class="stat"><div class="stat-value"><span>0</span></div><div class="stat-label">Shell Calls</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">Features</div>
+      <h2 class="section-title anim d1">Built for real gaming performance</h2>
+      <p class="section-desc anim d2">Every subsystem is hand-tuned in C — no JVM overhead, no shell forks, no polling scripts. Just a tight daemon that reacts in milliseconds.</p>
+      <div class="features-grid">
+        <div class="feat-card anim d1"><span class="feat-icon">🧠</span><div class="feat-title">Adaptive FSM</div><div class="feat-desc">5-state optimisation engine (SAFE → LOW → BALANCED → PERFORMANCE → TURBO) with hysteresis and dwell timers to prevent thrashing.</div></div>
+        <div class="feat-card anim d2"><span class="feat-icon">🌡️</span><div class="feat-title">Predictive Thermal</div><div class="feat-desc">Dual EMA smoothing reads all thermal zones and predicts temperature 5–10 seconds ahead — pre-cools before throttle ever hits.</div></div>
+        <div class="feat-card anim d3"><span class="feat-icon">🎯</span><div class="feat-title">Frame-Pacing Monitor</div><div class="feat-desc">Per-TID frame budget tracking via /proc schedstat. Detects overruns without a single shell call or extra spawned process.</div></div>
+        <div class="feat-card anim d1"><span class="feat-icon">📚</span><div class="feat-title">Per-Game Learning</div><div class="feat-desc">Builds a persistent EMA profile per package across sessions. The daemon learns your games and improves automatically over time.</div></div>
+        <div class="feat-card anim d2"><span class="feat-icon">⚡</span><div class="feat-title">CPU + GPU Control</div><div class="feat-desc">Sets governor, uclamp min/max, affinity masks per-TID, and Adreno GPU power levels — all via direct sysfs writes.</div></div>
+        <div class="feat-card anim d3"><span class="feat-icon">🛡️</span><div class="feat-title">Safety Guard</div><div class="feat-desc">Tracks a stability score and enforces safe mode on crash or hard-temp breach. Protected system processes are never touched.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compat">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">Compatibility</div>
+      <h2 class="section-title anim d1">What does it run on?</h2>
+      <p class="section-desc anim d2">Tested across all major Android SoC families. If your device is rooted and on Android 10+, AniOptimizer will work.</p>
+      <div class="compat-grid anim d2">
+        <div class="compat-card">
+          <div class="compat-icon">🔴</div>
+          <div>
+            <div class="compat-name">Qualcomm Snapdragon</div>
+            <div class="compat-detail">SD 845 and newer<br>Full CPU + Adreno GPU control<br>uclamp, WALT &amp; schedutil tuning<br>Tuned: 888, 8 Gen 1/2/3, Elite</div>
+          </div>
+        </div>
+        <div class="compat-card">
+          <div class="compat-icon">🟢</div>
+          <div>
+            <div class="compat-name">MediaTek (All)</div>
+            <div class="compat-detail">Helio G/P series + all Dimensity<br>Mali GPU + FPSGO &amp; PPM aware<br>MTK gpufreq + thermal zones<br>Started on Helio G100</div>
+          </div>
+        </div>
+        <div class="compat-card">
+          <div class="compat-icon">🔵</div>
+          <div>
+            <div class="compat-name">Samsung Exynos</div>
+            <div class="compat-detail">Exynos 2200 and newer<br>Mali GPU power levels<br>ExynosCore scheduling<br>Tuned: Exynos 2200, 2400</div>
+          </div>
+        </div>
+        <div class="compat-card">
+          <div class="compat-icon">🟡</div>
+          <div>
+            <div class="compat-name">Google Tensor</div>
+            <div class="compat-detail">Tensor G2 and newer<br>Pixel-specific sysfs paths<br>Fully supported<br>Tuned: Tensor G2, G3</div>
+          </div>
+        </div>
+      </div>
+      <h3 style="font-size:16px;font-weight:700;margin-bottom:18px;">System Requirements</h3>
+      <table class="req-table">
+        <tr><td>Android</td><td><span class="req-tag">10</span><span class="req-tag">11</span><span class="req-tag">12</span><span class="req-tag">13</span><span class="req-tag">14</span><span class="req-tag">15</span></td></tr>
+        <tr><td>Root</td><td><span class="req-tag yes">Magisk</span><span class="req-tag yes">KernelSU</span><span class="req-tag yes">APatch</span></td></tr>
+        <tr><td>Architecture</td><td><span class="req-tag yes">arm64-v8a</span><span class="req-tag no">arm32</span><span class="req-tag no">x86</span></td></tr>
+        <tr><td>Module type</td><td><span class="req-tag">Magisk Module</span></td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section id="install">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">Installation</div>
+      <h2 class="section-title anim d1">Up and running in minutes</h2>
+      <p class="section-desc anim d2">AniOptimizer ships as a standard Magisk module. No manual setup, no editing config files — flash and reboot.</p>
+      <div class="steps">
+        <div class="step anim d1">
+          <div class="step-line"><div class="step-num">01</div><div class="step-connector"></div></div>
+          <div class="step-body">
+            <div class="step-title">Ensure root access</div>
+            <div class="step-desc">Your device must be rooted with Magisk, KernelSU, or APatch. AniOptimizer requires root to write sysfs nodes at runtime.</div>
+          </div>
+        </div>
+        <div class="step anim d2">
+          <div class="step-line"><div class="step-num">02</div><div class="step-connector"></div></div>
+          <div class="step-body">
+            <div class="step-title">Download the module</div>
+            <div class="step-desc">Grab the latest <code style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent)">.zip</code> from the Downloads section. Always use the latest stable build.</div>
+          </div>
+        </div>
+        <div class="step anim d3">
+          <div class="step-line"><div class="step-num">03</div><div class="step-connector"></div></div>
+          <div class="step-body">
+            <div class="step-title">Flash via Magisk / KSU</div>
+            <div class="step-desc">Open Magisk Manager → Modules → Install from storage → select the zip. Or use the KernelSU / APatch equivalent.</div>
+            <div class="step-code"><span class="cm"># Alternative — flash from TWRP recovery</span><br>Install zip → AniOptimizer-vX.X.zip</div>
+          </div>
+        </div>
+        <div class="step anim d4">
+          <div class="step-line"><div class="step-num">04</div><div class="step-connector"></div></div>
+          <div class="step-body">
+            <div class="step-title">Reboot &amp; verify</div>
+            <div class="step-desc">Reboot your device. The daemon starts automatically on boot. No further config needed — AniOptimizer tunes itself per game.</div>
+            <div class="step-code"><span class="cm"># Confirm daemon is running</span><br><span class="kw">logcat</span> -s AniOptimizer<br><span class="cm"># Or check the module log</span><br><span class="kw">cat</span> /data/adb/modules/anioptimizer/logs/daemon.log</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="downloads">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">Downloads</div>
+      <h2 class="section-title anim d1">Latest releases</h2>
+      <p class="section-desc anim d2">All builds are fetched live from GitHub. Stable builds are recommended for all users; beta and alpha are for testers.</p>
+      <div class="releases-list" id="releasesList">
+        <div class="empty-state">
+          <div class="empty-icon">⏳</div>
+          <div class="empty-title">Loading releases…</div>
+          <div class="empty-sub">Fetching from GitHub.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">FAQ</div>
+      <h2 class="section-title anim d1">Common questions</h2>
+      <p class="section-desc anim d2">Have a question not listed here? Reach out on Telegram.</p>
+      <div class="faq-list">
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Does AniOptimizer drain more battery?<span class="faq-arrow">▾</span></div>
+          <div class="faq-a">No. The daemon is event-driven and sleeps between decisions. CPU usage is typically under 0.2% and it only scales up hardware resources when the game actually needs them.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Will it work on my custom kernel?<span class="faq-arrow">▾</span></div>
+          <div class="faq-a">Yes, as long as the kernel exposes standard sysfs nodes for the CPU governor and thermal zones. Most custom kernels (ElementalX, Kirisakura, Sultan, etc.) do.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Does it conflict with Game Mode / MIUI Turbo / etc.?<span class="faq-arrow">▾</span></div>
+          <div class="faq-a">AniOptimizer writes to the same sysfs nodes as OEM game modes but takes priority during gameplay. It's recommended to disable OEM game-enhancement features to avoid conflicts.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">Is Magisk/KSU required?<span class="faq-arrow">▾</span></div>
+          <div class="faq-a">Yes. The daemon must run as root to write sysfs performance nodes. It is packaged as a Magisk module for clean system-less installation and easy removal.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-q" onclick="toggleFaq(this)">How do I uninstall?<span class="faq-arrow">▾</span></div>
+          <div class="faq-a">Disable or remove the module through Magisk Manager and reboot. All sysfs changes are ephemeral and reset on reboot automatically.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="about">
+  <div class="section-wrap">
+    <div class="wrap">
+      <div class="section-eye anim">About</div>
+      <h2 class="section-title anim d1">Built different</h2>
+      <p class="section-desc anim d2">AniOptimizer started as a shell script experiment to fix the stuttering on a rooted Helio G100 device. It grew into a fully featured native C daemon used across thousands of devices.</p>
+      <div class="about-grid">
+        <div>
+          <div class="about-card">
+            <div class="about-card-title">Changelog</div>
+            <div class="changelog-list" id="changelogList">
+              <div class="cl-item">
+                <div class="cl-dot-line"><div class="cl-dot"></div><div class="cl-line"></div></div>
+                <div><div class="cl-ver">Loading…</div><div class="cl-notes">Fetching release history.</div></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="about-card" style="margin-bottom:16px;">
+            <div class="about-card-title">Project Info</div>
+            <div class="about-info-row"><span>Author</span><span>mrk</span></div>
+            <div class="about-info-row"><span>Language</span><span>C (native)</span></div>
+            <div class="about-info-row"><span>Target</span><span>Android 10–15</span></div>
+            <div class="about-info-row"><span>License</span><span>Proprietary</span></div>
+            <div class="about-info-row"><span>Latest</span><span id="aboutLatest">—</span></div>
+          </div>
+          <div class="about-links">
+            <a class="about-link" href="https://github.com/mrkk9091" target="_blank" rel="noopener">
+              <div class="about-link-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg></div>
+              GitHub Repository
+            </a>
+            <a class="about-link" href="https://t.me/optimizeph" target="_blank" rel="noopener">
+              <div class="about-link-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2.5L2 10l7 2.5M21.5 2.5L14 22l-5-9.5M21.5 2.5L9 12.5m0 0L14 22"/></svg></div>
+              Telegram Channel
+            </a>
+            <a class="about-link" href="#" onclick="showSection('downloads');return false;">
+              <div class="about-link-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>
+              Latest Release
+            </a>
+            <a class="about-link" href="#" onclick="showSection('faq');return false;">
+              <div class="about-link-icon"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+              FAQ &amp; Support
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="footer-brand-name">AniOptimizer</div>
+        <div class="footer-brand-desc">Native C gaming daemon for Android. Built to eliminate stutter and thermal throttle without compromise.</div>
+      </div>
+      <div>
+        <div class="footer-col-title">Navigate</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="showSection('home');return false;">Home</a></li>
+          <li><a href="#" onclick="showSection('features');return false;">Features</a></li>
+          <li><a href="#" onclick="showSection('compat');return false;">Compatibility</a></li>
+          <li><a href="#" onclick="showSection('install');return false;">Install</a></li>
+          <li><a href="#" onclick="showSection('downloads');return false;">Downloads</a></li>
+          <li><a href="#" onclick="showSection('faq');return false;">FAQ</a></li>
+          <li><a href="#" onclick="showSection('about');return false;">About</a></li>
+        </ul>
+      </div>
+      <div>
+        <div class="footer-col-title">Project</div>
+        <ul class="footer-links">
+          <li><a href="#" onclick="showSection('downloads');return false;">Latest Release</a></li>
+          <li><a href="#" onclick="showSection('faq');return false;">Support</a></li>
+          <li><a href="https://github.com/mrkk9091" target="_blank" rel="noopener">GitHub ↗</a></li>
+          <li><a href="https://t.me/optimizeph" target="_blank" rel="noopener">Telegram ↗</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copy">© 2025 mrk — All rights reserved</div>
+      <div class="footer-legal">Reverse engineering, redistribution, or modification of distributed binaries is strictly prohibited.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+'use strict';
+
+const RELEASES_URL = 'https://raw.githubusercontent.com/mrkk9091/anioptimizerweb/main/releases.json';
+let releases = [];
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const fmtDate = iso => { try { return new Date(iso).toLocaleDateString('en-US',{year:'numeric',month:'short',day:'numeric'}); } catch { return iso; } };
+const chClass = c => ({stable:'rtag-stable',beta:'rtag-beta',alpha:'rtag-alpha'}[c]||'rtag-stable');
+const chLabel = c => c ? c.charAt(0).toUpperCase()+c.slice(1) : 'Stable';
+
+const SECTIONS = ['home','features','compat','install','downloads','faq','about'];
+
+function showSection(id) {
+  SECTIONS.forEach(sid => {
+    const el = document.getElementById(sid);
+    if (el) el.classList.toggle('active-section', sid === id);
+  });
+  document.querySelectorAll('.nav-links a[onclick]').forEach(a => {
+    a.classList.toggle('active', (a.getAttribute('onclick')||'').includes("'"+id+"'"));
+  });
+  window.scrollTo(0, 0);
+}
+
+function toggleMobile() { $('mobileMenu').classList.toggle('open'); }
+function closeMobile()  { $('mobileMenu').classList.remove('open'); }
+function toggleFaq(btn) { btn.closest('.faq-item').classList.toggle('open'); }
+
+function renderReleases(data) {
+  const list = $('releasesList');
+  if (!data || !data.length) {
+    list.innerHTML = `<div class="empty-state"><div class="empty-icon">🚀</div><div class="empty-title">No releases yet</div><div class="empty-sub">Check back soon.</div></div>`;
+    return;
+  }
+
+  // Sort by version number descending (highest version = latest)
+  const sorted = [...data].sort((a, b) => {
+    const verA = parseFloat(String(a.version).replace(/[^0-9.]/g, '')) || 0;
+    const verB = parseFloat(String(b.version).replace(/[^0-9.]/g, '')) || 0;
+    return verB - verA;
+  });
+
+  if (sorted[0]) {
+    $('heroBadge').textContent = sorted[0].version + ' ' + chLabel(sorted[0].channel);
+    $('aboutLatest').textContent = sorted[0].version;
+    $('heroVersion').textContent = sorted[0].version;
+  }
+
+  renderChangelog(sorted.slice(0, 5));
+
+  list.innerHTML = sorted.map((r, i) => `
+    <div class="release-card ${i === 0 ? 'is-latest' : ''}" style="animation-delay:${i * .08}s">
+      <div>
+        <div class="release-header">
+          <span class="release-version">${esc(r.version)}</span>
+          ${i === 0 ? '<span class="rtag rtag-latest">Latest</span>' : ''}
+          <span class="rtag ${chClass(r.channel)}">${chLabel(r.channel)}</span>
+          <span class="release-date">${fmtDate(r.date)}</span>
+        </div>
+        ${r.notes ? `<p class="release-notes">${esc(r.notes)}</p>` : ''}
+        <div class="release-chips">
+          <div class="chip">Author <span>mrk</span></div>
+          ${r.arch ? `<div class="chip">Arch <span>${esc(r.arch)}</span></div>` : ''}
+          ${r.type ? `<div class="chip">Type <span>${esc(r.type)}</span></div>` : ''}
+          ${r.size ? `<div class="chip">Size <span>${esc(r.size)}</span></div>` : ''}
+        </div>
+      </div>
+      ${r.url
+        ? `<a class="dl-btn" href="${esc(r.url)}" target="_blank" rel="noopener"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Download</a>`
+        : `<button class="dl-btn no-link" disabled>No link yet</button>`}
+    </div>`).join('');
+}
+
+function renderChangelog(data) {
+  const cl = $('changelogList');
+  if (!cl || !data.length) return;
+  cl.innerHTML = data.map(r => `
+    <div class="cl-item">
+      <div class="cl-dot-line"><div class="cl-dot"></div><div class="cl-line"></div></div>
+      <div>
+        <div class="cl-ver">${esc(r.version)} <span style="color:var(--muted);font-weight:400">${fmtDate(r.date)}</span></div>
+        <div class="cl-notes">${r.notes ? esc(r.notes.slice(0, 90)) + (r.notes.length > 90 ? '…' : '') : 'No notes.'}</div>
+      </div>
+    </div>`).join('');
+}
+
+showSection('home');
+
+(async function fetchReleases() {
+  try {
+    const res = await fetch(RELEASES_URL, { cache: 'no-cache' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    if (Array.isArray(data)) {
+      releases = data;
+      renderReleases(releases);
+    }
+  } catch (err) {
+    $('releasesList').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">⚠️</div>
+        <div class="empty-title">Could not load releases</div>
+        <div class="empty-sub">Check your internet connection or try again later.<br><small style="opacity:.5">${err.message}</small></div>
+      </div>`;
+    $('heroBadge').textContent = 'See Downloads';
+  }
+})();
+</script>
+</body>
+</html>
