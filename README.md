@@ -1,3 +1,13 @@
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mrkk9091/anioptimizerweb/main/8936.png" width="120" alt="AniOptimizer Logo">
+</p>
+
+<h1 align="center">AniOptimizer</h1>
+<p align="center"><strong>Native C Gaming Daemon for Android</strong></p>
+<p align="center">Eliminate stutter, jank, and thermal throttle — in real time.</p>
+
+---
+
 # [AniOptimizer Website](https://mrkk9091.github.io/anioptimizerweb/)
 
 This is the source code for the official **AniOptimizer** landing page — a modern, single-page application built with vanilla HTML, CSS, and JavaScript.
@@ -22,5 +32,4 @@ The website serves as the central hub for the AniOptimizer project. It provides 
 
 ### Key Links
 - **Live Website:** [Website](https://mrkk9091.github.io/anioptimizerweb/)
-- **Project GitHub:** [GitHub](https://github.com/mrkk9091)
 - **Telegram Channel:** [Telegram](https://t.me/optimizeph)
