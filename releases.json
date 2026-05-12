@@ -1,5 +1,17 @@
 [
   {
+    "id": "8daf86f6-4cca-461d-9f10-2fde7090620f",
+    "name": "Test",
+    "version": "v1",
+    "notes": "test",
+    "url": "https://github.com/mrkk9091/anioptimizerweb/blob/main/index.html",
+    "channel": "beta",
+    "size": "1k",
+    "arch": "arm64 · LTO",
+    "type": "Magisk Module",
+    "date": "2026-05-12T00:52:50.395Z"
+  },
+  {
     "id": "ed6bcbf2-ff14-4f64-9b73-b1943637bf18",
     "name": "AniOptimizer",
     "version": "V5",
