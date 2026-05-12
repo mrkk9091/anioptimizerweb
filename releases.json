@@ -1,21 +1,6 @@
 {
   "releases": [
     {
-      "id": "e38cb8bd-6a0c-4640-980f-5fe32ee8914d",
-      "name": "..",
-      "version": "V1",
-      "channel": "alpha",
-      "url": "k",
-      "notes": "",
-      "size": "1k",
-      "arch": "arm64 · LTO",
-      "type": "Magisk Module",
-      "altLabel": "h",
-      "altUrl": "h",
-      "bannerImage": "9754.png",
-      "date": "2026-05-12T05:38:53.481Z"
-    },
-    {
       "id": "ed6bcbf2-ff14-4f64-9b73-b1943637bf18",
       "name": "AniOptimizer",
       "version": "V5",
